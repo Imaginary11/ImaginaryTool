@@ -1,2 +1,2 @@
 # ImaginaryTool
-java utils make code easy
+some java utils that make coding easy
