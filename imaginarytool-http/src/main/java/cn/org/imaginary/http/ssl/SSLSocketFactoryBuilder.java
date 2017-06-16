@@ -1,7 +1,7 @@
 package cn.org.imaginary.http.ssl;
 
 
-import cn.org.imaginary.util.ArraysUtils;
+import cn.org.imaginary.util.ArrayUtils;
 import cn.org.imaginary.util.StrUtils;
 
 import javax.net.ssl.KeyManager;
@@ -73,7 +73,7 @@ public class SSLSocketFactoryBuilder {
      * @return SSLSocketFactoryBuilder
      */
     public SSLSocketFactoryBuilder setProtocol(String protocol) {
-        if (!StrUtils.isNotBlank()) {
+        if (!StrUtils.isNotBlank(protocol)) {
             this.protocol = protocol;
         }
         return this;
@@ -86,7 +86,7 @@ public class SSLSocketFactoryBuilder {
      * @return SSLSocketFactoryBuilder
      */
     public SSLSocketFactoryBuilder setTrustManager(TrustManager... trustManagers) {
-        if (ArraysUtils.isNotEmpty(trustManagers)) {
+        if (ArrayUtils.isNotEmpty(trustManagers)) {
             this.trustManagers = trustManagers;
         }
         return this;
@@ -99,7 +99,7 @@ public class SSLSocketFactoryBuilder {
      * @return SSLSocketFactoryBuilder
      */
     public SSLSocketFactoryBuilder setKeyManager(KeyManager... keyManagers) {
-        if (ArraysUtils.isNotEmpty(keyManagers)) {
+        if (ArrayUtils.isNotEmpty(keyManagers)) {
             this.keyManagers = keyManagers;
         }
         return this;

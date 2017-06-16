@@ -1,5 +1,10 @@
 package cn.org.imaginary.util;
 
+import cn.org.imaginary.lang.StrFormatter;
+
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+
 /**
  * str utils
  *
@@ -7,7 +12,7 @@ package cn.org.imaginary.util;
  * @see
  * @since 1.0
  */
-public class StrUtils {
+public final class StrUtils {
 
     public static final char C_SPACE = ' ';
     public static final char C_TAB = '	';
@@ -48,7 +53,6 @@ public class StrUtils {
 
     private StrUtils() {
     }
-
     /**
      * is charsequence blank for contains sub season： <br>
      * 1. null <br>
@@ -58,16 +62,20 @@ public class StrUtils {
      * @param str a str of check
      * @return true or false
      */
-    public static boolean isNotBlank(CharSequence str) {
+    public static boolean isBlank(CharSequence str) {
         int length;
-        if (null == str || (length = str.length()) == 0) {
+
+        if ((str == null) || ((length = str.length()) == 0)) {
             return true;
         }
-        for (int index = 0; index < length; index++) {
-            if (!NumberUtils.isBlankChar(str.charAt(index))) {
+
+        for (int i = 0; i < length; i++) {
+            // 只要有一个非空字符即为非空字符串
+            if (false == NumberUtils.isBlankChar(str.charAt(i))) {
                 return false;
             }
         }
+
         return true;
     }
 
@@ -142,5 +150,170 @@ public class StrUtils {
      */
     public static String nullToDefault(CharSequence str, String defaultStr) {
         return (str == null) ? defaultStr : str.toString();
+    }
+
+    /**
+     * 将对象转为字符串<br>
+     * 1、Byte数组和ByteBuffer会被转换为对应字符串的数组 2、对象数组会调用Arrays.toString方法
+     *
+     * @param obj 对象
+     * @return 字符串
+     */
+    public static String utf8Str(Object obj) {
+        return str(obj, CharsetUtils.CHARSET_UTF_8);
+    }
+
+    /**
+     * 将对象转为字符串<br>
+     * 1、Byte数组和ByteBuffer会被转换为对应字符串的数组 2、对象数组会调用Arrays.toString方法
+     *
+     * @param obj 对象
+     * @param charsetName 字符集
+     * @return 字符串
+     */
+    public static String str(Object obj, String charsetName) {
+        return str(obj, Charset.forName(charsetName));
+    }
+
+    /**
+     * 将对象转为字符串<br>
+     * 1、Byte数组和ByteBuffer会被转换为对应字符串的数组 2、对象数组会调用Arrays.toString方法
+     *
+     * @param obj 对象
+     * @param charset 字符集
+     * @return 字符串
+     */
+    public static String str(Object obj, Charset charset) {
+        if (null == obj) {
+            return null;
+        }
+
+        if (obj instanceof String) {
+            return (String) obj;
+        } else if (obj instanceof byte[]) {
+            return str((byte[]) obj, charset);
+        } else if (obj instanceof Byte[]) {
+            return str((Byte[]) obj, charset);
+        } else if (obj instanceof ByteBuffer) {
+            return str((ByteBuffer) obj, charset);
+        } else if (ArrayUtils.isArray(obj)) {
+            return ArrayUtils.toString(obj);
+        }
+
+        return obj.toString();
+    }
+
+    /**
+     * 将byte数组转为字符串
+     *
+     * @param bytes byte数组
+     * @param charset 字符集
+     * @return 字符串
+     */
+    public static String str(byte[] bytes, String charset) {
+        return str(bytes, isBlank(charset) ? Charset.defaultCharset() : Charset.forName(charset));
+    }
+
+    /**
+     * 解码字节码
+     *
+     * @param data 字符串
+     * @param charset 字符集，如果此字段为空，则解码的结果取决于平台
+     * @return 解码后的字符串
+     */
+    public static String str(byte[] data, Charset charset) {
+        if (data == null) {
+            return null;
+        }
+
+        if (null == charset) {
+            return new String(data);
+        }
+        return new String(data, charset);
+    }
+
+    /**
+     * 将Byte数组转为字符串
+     *
+     * @param bytes byte数组
+     * @param charset 字符集
+     * @return 字符串
+     */
+    public static String str(Byte[] bytes, String charset) {
+        return str(bytes, isBlank(charset) ? Charset.defaultCharset() : Charset.forName(charset));
+    }
+
+    /**
+     * 解码字节码
+     *
+     * @param data 字符串
+     * @param charset 字符集，如果此字段为空，则解码的结果取决于平台
+     * @return 解码后的字符串
+     */
+    public static String str(Byte[] data, Charset charset) {
+        if (data == null) {
+            return null;
+        }
+
+        byte[] bytes = new byte[data.length];
+        Byte dataByte;
+        for (int i = 0; i < data.length; i++) {
+            dataByte = data[i];
+            bytes[i] = (null == dataByte) ? -1 : dataByte.byteValue();
+        }
+
+        return str(bytes, charset);
+    }
+
+    /**
+     * 将编码的byteBuffer数据转换为字符串
+     *
+     * @param data 数据
+     * @param charset 字符集，如果为空使用当前系统字符集
+     * @return 字符串
+     */
+    public static String str(ByteBuffer data, String charset) {
+        if (data == null) {
+            return null;
+        }
+
+        return str(data, Charset.forName(charset));
+    }
+
+    /**
+     * 将编码的byteBuffer数据转换为字符串
+     *
+     * @param data 数据
+     * @param charset 字符集，如果为空使用当前系统字符集
+     * @return 字符串
+     */
+    public static String str(ByteBuffer data, Charset charset) {
+        if (null == charset) {
+            charset = Charset.defaultCharset();
+        }
+        return charset.decode(data).toString();
+    }
+
+    /**
+     * 格式化文本, {} 表示占位符<br>
+     * 此方法只是简单将占位符 {} 按照顺序替换为参数<br>
+     * 如果想输出 {} 使用 \\转义 { 即可，如果想输出 {} 之前的 \ 使用双转义符 \\\\ 即可<br>
+     * 例：<br>
+     * 通常使用：format("this is {} for {}", "a", "b") =》 this is a for b<br>
+     * 转义{}： format("this is \\{} for {}", "a", "b") =》 this is \{} for a<br>
+     * 转义\： format("this is \\\\{} for {}", "a", "b") =》 this is \a for b<br>
+     *
+     * @param template 文本模板，被替换的部分用 {} 表示
+     * @param params 参数值
+     * @return 格式化后的文本
+     */
+    public static String format(CharSequence template, Object... params) {
+        if(null == template){
+            return null;
+        }
+        if (ArrayUtils.isEmpty(params) || isBlank(template)) {
+            return template.toString();
+        }
+        return StrFormatter.format(template.toString(), params);
     }
 }

@@ -5,7 +5,7 @@ package cn.org.imaginary.util;
  * @see
  * @since 1.0
  */
-public class NumberUtils {
+public final class NumberUtils {
     private NumberUtils() {
     }
 
@@ -22,4 +22,6 @@ public class NumberUtils {
     public static boolean isBlankChar(int c) {
         return Character.isWhitespace(c) || Character.isSpaceChar(c);
     }
+
+
 }

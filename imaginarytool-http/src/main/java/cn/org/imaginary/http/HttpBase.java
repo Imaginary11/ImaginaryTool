@@ -3,8 +3,8 @@ package cn.org.imaginary.http;
 import cn.org.imaginary.util.CharsetUtils;
 import cn.org.imaginary.util.CollectionUtils;
 import cn.org.imaginary.util.StrUtils;
-import com.sun.org.apache.regexp.internal.RE;
 
+import java.nio.charset.Charset;
 import java.util.*;
 
 /**
@@ -36,7 +36,7 @@ public abstract class HttpBase<T> {
      * @return header value
      */
     public String getHeader(String name) {
-        if (StrUtils.isNotBlank(name)) {
+        if (StrUtils.isBlank(name)) {
             return null;
         }
         List<String> values = headers.get(name.trim());
@@ -61,7 +61,7 @@ public abstract class HttpBase<T> {
      * @param isOverride is override header value model ?
      * @return this
      */
-    public T setHeader(String name, String value, boolean isOverride) {
+    public T header(String name, String value, boolean isOverride) {
         if (!StrUtils.isEmpty(name, value)) {
             List<String> values = headers.get(name);
             if (isOverride || CollectionUtils.isEmpty(values)) {
@@ -83,8 +83,8 @@ public abstract class HttpBase<T> {
      * @param isOverride is override header value model ?
      * @return this
      */
-    public T setHeader(Header name, String value, boolean isOverride) {
-        return setHeader(name.toString(), value, isOverride);
+    public T header(Header name, String value, boolean isOverride) {
+        return header(name.toString(), value, isOverride);
     }
 
     /**
@@ -94,8 +94,8 @@ public abstract class HttpBase<T> {
      * @param value header value
      * @return this
      */
-    public T setHeader(String name, String value) {
-        return setHeader(name, value, true);
+    public T header(String name, String value) {
+        return header(name, value, true);
     }
 
     /**
@@ -105,8 +105,8 @@ public abstract class HttpBase<T> {
      * @param value header value
      * @return this
      */
-    public T setHeader(Header name, String value) {
-        return setHeader(name.toString(), value, true);
+    public T header(Header name, String value) {
+        return header(name.toString(), value, true);
     }
 
     /**
@@ -115,7 +115,7 @@ public abstract class HttpBase<T> {
      * @param headers header map
      * @return this
      */
-    public T setHeader(Map<String, List<String>> headers) {
+    public T header(Map<String, List<String>> headers) {
         if (CollectionUtils.isEmpty(headers)) {
             return (T) this;
         }
@@ -123,7 +123,7 @@ public abstract class HttpBase<T> {
         for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
             name = entry.getKey();
             for (String value : entry.getValue()) {
-                this.setHeader(name, StrUtils.nullToEmpty(value));
+                this.header(name, StrUtils.nullToEmpty(value));
             }
         }
         return (T) this;
@@ -159,6 +159,62 @@ public abstract class HttpBase<T> {
      */
     public Map<String, List<String>> getHeaders() {
         return Collections.unmodifiableMap(headers);
+    }
+
+    /**
+     * get httpVersion
+     *
+     * @return httpVersion
+     */
+    public String getHttpVersion() {
+        return httpVersion;
+    }
+
+    /**
+     * set httpVersion
+     *
+     * @param httpVersion
+     * @return HttpBase
+     */
+    public T httpVersion(String httpVersion) {
+        this.httpVersion = httpVersion;
+        return (T) this;
+    }
+
+    /**
+     * return charset
+     *
+     * @return charset
+     */
+    public String getCharset() {
+        return charset;
+    }
+
+    /**
+     * set charset
+     *
+     * @param charset charset parameter
+     * @return HttpBase
+     */
+    public T charset(Charset charset) {
+        if (null != charset) {
+            this.charset = charset.name();
+        }
+        return (T) this;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Request Headers: ").append(StrUtils.CRLF);
+        for (Map.Entry<String, List<String>> entry : this.headers.entrySet()) {
+            sb.append("    ").append(entry).append(StrUtils.CRLF);
+        }
+
+        sb.append("Request Body: ").append(StrUtils.CRLF);
+        sb.append("    ").append(this.body).append(StrUtils.CRLF);
+
+        return sb.toString();
     }
 
 
